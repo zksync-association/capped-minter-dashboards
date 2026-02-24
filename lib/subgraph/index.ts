@@ -10,7 +10,7 @@ export {
 
 export {
   useProgramTree,
-  useProgramsList,
   programTreeToFlow,
   type ProgramTreeNodesEdges,
-} from "./hooks";
+} from "@/lib/hooks/useProgramTree";
+export { useProgramsList } from "@/lib/hooks/useProgramsList";

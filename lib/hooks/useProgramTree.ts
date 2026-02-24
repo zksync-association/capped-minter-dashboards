@@ -5,12 +5,12 @@ import type { Node, Edge } from "@xyflow/react";
 import type { MinterNodeData } from "@/components/program-flow";
 import {
   fetchProgramTree,
-  fetchProgramsList,
   type ProgramTreeData,
-} from "./client";
+} from "@/lib/subgraph/client";
+import type { MinterType } from "@/lib/types";
 
-// Subgraph Minter.type values: "capped-v3" | "capped-v2" | "delay" | "rate-limit" | "unknown"
-const MINTER_TYPE_LABELS: Record<string, string> = {
+/** Subgraph Minter.type values include MinterType + "unknown". */
+const MINTER_TYPE_LABELS: Record<MinterType | "unknown", string> = {
   "capped-v3": "Capped Minter V3",
   "capped-v2": "Capped Minter V2",
   delay: "Delay Minter",
@@ -37,7 +37,7 @@ export function programTreeToFlow(
 
   const { root, minters } = data.program;
   const typeLabel = (type: string) =>
-    MINTER_TYPE_LABELS[type] ?? "Unknown";
+    MINTER_TYPE_LABELS[type as MinterType | "unknown"] ?? "Unknown";
   const status = (s: string): MinterNodeData["status"] =>
     STATUS_MAP[s?.toLowerCase() ?? ""] ?? "Active";
 
@@ -82,15 +82,6 @@ export function useProgramTree(rootAddress: string | null) {
   return useQuery({
     queryKey: ["programTree", rootAddress ?? ""],
     queryFn: () => fetchProgramTree(rootAddress!),
-    enabled,
-  });
-}
-
-export function useProgramsList() {
-  const enabled = Boolean(process.env.NEXT_PUBLIC_SUBGRAPH_URL);
-  return useQuery({
-    queryKey: ["programsList"],
-    queryFn: fetchProgramsList,
     enabled,
   });
 }

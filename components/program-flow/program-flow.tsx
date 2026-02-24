@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   ReactFlow,
@@ -76,6 +76,11 @@ function ProgramFlowInner({
   className,
 }: ProgramFlowProps) {
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+  }, []);
+
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
     () => getLayoutedElements(initialNodes, initialEdges, "TB"),
     [initialNodes, initialEdges]
@@ -108,6 +113,14 @@ function ProgramFlowInner({
     []
   );
 
+  const defaultEdgeOptions = useMemo(
+    () => ({
+      type: "smoothstep" as const,
+      markerEnd: { type: MarkerType.ArrowClosed },
+    }),
+    []
+  );
+
   if (loading) {
     return (
       <div className={className} style={{ height: 400 }}>
@@ -121,7 +134,7 @@ function ProgramFlowInner({
   return (
     <div className={className} style={{ height: 400 }}>
       <ReactFlow
-        colorMode={resolvedTheme === "dark" ? "dark" : "light"}
+        colorMode={mounted && resolvedTheme === "dark" ? "dark" : "light"}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -132,10 +145,7 @@ function ProgramFlowInner({
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.1}
         maxZoom={2}
-        defaultEdgeOptions={{
-          type: "smoothstep",
-          markerEnd: { type: MarkerType.ArrowClosed },
-        }}
+        defaultEdgeOptions={defaultEdgeOptions}
       >
         <Controls />
         <Background gap={12} size={1} />

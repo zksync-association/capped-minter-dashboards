@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { Node, NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-export function ProgramFlowNode(props: NodeProps<MinterNode>) {
+function ProgramFlowNodeInner(props: NodeProps<MinterNode>) {
   const { data } = props;
   const status = data.status ?? "Active";
   const borderClass = statusBorderClass[status];
@@ -46,3 +47,5 @@ export function ProgramFlowNode(props: NodeProps<MinterNode>) {
     </>
   );
 }
+
+export const ProgramFlowNode = memo(ProgramFlowNodeInner);

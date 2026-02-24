@@ -66,7 +66,7 @@ export function Header() {
           </DropdownMenu>
         </nav>
         <div className="flex items-center gap-2">
-          <ConnectButton />
+          <ConnectButton chainStatus="none" showBalance={false}/>
           <ThemeToggle />
         </div>
       </div>
