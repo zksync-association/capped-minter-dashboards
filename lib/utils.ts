@@ -13,8 +13,8 @@ export function getChainId(): number {
 }
 
 export function getBlockExplorerAddressUrl(address: string): string {
-  const ZKSYNC_MAINNET_EXPLORER = "https://era.zksync.network"
-  const ZKSYNC_SEPOLIA_EXPLORER = "https://sepolia-era.zksync.network"
+  const ZKSYNC_MAINNET_EXPLORER = "https://explorer.zksync.io"
+  const ZKSYNC_SEPOLIA_EXPLORER = "https://sepolia.explorer.zksync.io"
   const base =
     getChainId() === 300
       ? ZKSYNC_SEPOLIA_EXPLORER

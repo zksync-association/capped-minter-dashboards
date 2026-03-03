@@ -85,7 +85,6 @@ export function DateTimeField({
   };
 
   const handleTimeChange = (h: number, m: number) => {
-    const base = dateOnly ?? new Date();
     const d = dateOnly ?? new Date();
     const combined = new Date(
       d.getFullYear(),

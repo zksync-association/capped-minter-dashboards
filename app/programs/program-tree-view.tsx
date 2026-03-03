@@ -2,9 +2,9 @@
 
 import { useMemo } from "react";
 import { ProgramFlow } from "@/components/program-flow";
-import { getProgramFlow } from "@/lib/programs";
-import { MOCK_PROGRAM_FLOWS } from "@/mock/program-flow";
-// import { useProgramTree, programTreeToFlow } from "@/lib/hooks/useProgramTree";
+import { getProgramsForChain } from "@/lib/programs";
+import { getChainId } from "@/lib/utils";
+import { useProgramTree, programTreeToFlow } from "@/lib/hooks/useProgramTree";
 
 type ProgramTreeViewProps = {
   /** When set, shows the graph for this program's root. Otherwise first program's graph. */
@@ -14,25 +14,30 @@ type ProgramTreeViewProps = {
 export function ProgramTreeView({
   selectedProgramRootAddress = null,
 }: ProgramTreeViewProps) {
-  const { nodes, edges } = useMemo(() => {
-    const flow = selectedProgramRootAddress
-      ? getProgramFlow(selectedProgramRootAddress)
-      : MOCK_PROGRAM_FLOWS[0];
-    if (!flow) {
-      return { nodes: [], edges: [] };
-    }
-    return { nodes: flow.nodes, edges: flow.edges };
-  }, [selectedProgramRootAddress]);
+  const chainId = getChainId();
+  const programs = useMemo(
+    () => getProgramsForChain(chainId),
+    [chainId]
+  );
+  const rootToShow =
+    selectedProgramRootAddress ??
+    programs[0]?.rootAddresses?.[0] ??
+    null;
 
-  // const { data: programTreeData, isLoading } = useProgramTree(selectedProgramRootAddress ?? null);
-  // const useRealData = Boolean(selectedProgramRootAddress && programTreeData?.program);
-  const loading = false;
+  const { data: programTreeData, isPending } = useProgramTree(
+    rootToShow ?? null
+  );
+
+  const { nodes, edges } = useMemo(() => {
+    if (!programTreeData?.program) return { nodes: [], edges: [] };
+    return programTreeToFlow(programTreeData);
+  }, [programTreeData]);
 
   return (
     <ProgramFlow
       nodes={nodes}
       edges={edges}
-      loading={loading}
+      loading={isPending}
       className="w-full rounded-lg border border-border"
     />
   );

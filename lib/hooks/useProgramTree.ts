@@ -35,7 +35,8 @@ export function programTreeToFlow(
   const edges: Edge[] = [];
   if (!data?.program) return { nodes, edges };
 
-  const { root, minters } = data.program;
+  const { root } = data.program;
+  const minters = data.minters ?? [];
   const typeLabel = (type: string) =>
     MINTER_TYPE_LABELS[type as MinterType | "unknown"] ?? "Unknown";
   const status = (s: string): MinterNodeData["status"] =>
@@ -52,7 +53,9 @@ export function programTreeToFlow(
     },
   });
 
+  const rootId = root.id;
   for (const m of minters) {
+    if (m.id === rootId) continue;
     nodes.push({
       id: m.id,
       type: "minter",

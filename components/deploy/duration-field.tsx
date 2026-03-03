@@ -90,7 +90,6 @@ export function DurationField({
         className="flex flex-wrap items-center gap-2"
         role="group"
         aria-describedby={error ? `${fieldId}-error` : undefined}
-        aria-invalid={!!error}
         onBlur={onBlur}
       >
         <div className="flex items-center gap-1">

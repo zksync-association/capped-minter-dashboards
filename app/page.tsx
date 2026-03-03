@@ -15,11 +15,11 @@ export default function Home() {
   const selectedRootAddress = useMemo(() => {
     const root = searchParams.get("root");
     if (root && root.startsWith("0x")) return root as `0x${string}`;
-    return programs[0]?.rootAddress ?? null;
+    return programs[0]?.rootAddresses?.[0] ?? null;
   }, [searchParams, programs]);
 
-  const handleRowSelect = (program: (typeof programs)[number]) => {
-    const url = `${window.location.pathname}?root=${encodeURIComponent(program.rootAddress)}`;
+  const handleRowSelect = (row: { rootAddress: `0x${string}` }) => {
+    const url = `${window.location.pathname}?root=${encodeURIComponent(row.rootAddress)}`;
     window.location.href = url;
   };
 

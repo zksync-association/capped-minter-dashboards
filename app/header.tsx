@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -7,7 +8,9 @@ import {
   Gauge,
   Layers,
   Box,
+  KeyRound,
   type LucideIcon,
+  CircleQuestionMarkIcon,
 } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +22,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { MinterType } from "@/lib/types";
+import { DEPLOY_PROGRESS_EVENT_NAME } from "@/lib/hooks/useDeployMinter";
+import { useDeployProgressStore } from "@/lib/stores/deployProgressStore";
 
 const DEPLOY_ITEMS: {
   href: string;
@@ -31,7 +37,24 @@ const DEPLOY_ITEMS: {
   { href: "/deploy/rate-limit", label: "Rate Limit Mod", icon: Gauge },
 ];
 
+const MAX_DEPLOY_AGE_MS = 60 * 60 * 1000; // 1 hour
+
 export function Header() {
+  const activeDeploy = useDeployProgressStore((s) => s.activeDeploy);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const pendingDeploy =
+    activeDeploy &&
+    activeDeploy.type &&
+    now - activeDeploy.startedAt < MAX_DEPLOY_AGE_MS
+      ? activeDeploy
+      : null;
+
+  const resolveDeployHref = (type: MinterType) => `/deploy/${type}?showProgress=true`;
+
   return (
     <header className="w-full">
       <div className="flex items-center justify-between gap-4 px-6 py-4">
@@ -64,10 +87,51 @@ export function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Link
+            href="/grant-role"
+            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <KeyRound className="size-4" />
+            Grant role
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
-          <ConnectButton chainStatus="none" showBalance={false}/>
+          {pendingDeploy && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              asChild
+            >
+              <Link
+                href={resolveDeployHref(pendingDeploy.type)}
+                onClick={() => {
+                  if (typeof window === "undefined") return;
+                  const targetPath = `/deploy/${pendingDeploy.type}`;
+                  if (window.location.pathname.startsWith(targetPath)) {
+                    window.dispatchEvent(
+                      new Event(DEPLOY_PROGRESS_EVENT_NAME)
+                    );
+                  }
+                }}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
+                <span className="hidden sm:inline">Transaction in progress</span>
+                <span className="sm:hidden">Tx in progress</span>
+              </Link>
+            </Button>
+          )}
+          <ConnectButton chainStatus="none" showBalance={false} />
           <ThemeToggle />
+          <Link
+            href="/how-to"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            <CircleQuestionMarkIcon className="size-4" />
+          </Link>
         </div>
       </div>
       <Separator />

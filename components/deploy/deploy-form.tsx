@@ -4,7 +4,11 @@ import * as React from "react";
 import { useConnection } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import type { MinterType } from "@/lib/types";
-import { useDeployMinter } from "@/lib/hooks/useDeployMinter";
+import {
+  useDeployMinter,
+  DEPLOY_PROGRESS_EVENT_NAME,
+} from "@/lib/hooks/useDeployMinter";
+import { useDeployProgressStore } from "@/lib/stores/deployProgressStore";
 import {
   validateAddress,
   validateAdmin,
@@ -27,12 +31,19 @@ type DeployFormProps = {
   initialAdmin?: string;
   /** Prefill mintable from URL (e.g. ?mintable=0x... from "Deploy another" with previous deploy). */
   initialMintable?: string;
+  /** When true, open the progress modal on initial render (e.g. from nav button). */
+  initialProgressOpen?: boolean;
 };
 
 const primaryButtonClass =
   "rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50";
 
-export function DeployForm({ type, initialAdmin, initialMintable }: DeployFormProps) {
+export function DeployForm({
+  type,
+  initialAdmin,
+  initialMintable,
+  initialProgressOpen = false,
+}: DeployFormProps) {
   const { isConnected, address: walletAddress } = useConnection();
   const { openConnectModal } = useConnectModal();
   const { deploy, isPending, error: deployError, step: deployStep } = useDeployMinter(type);
@@ -47,6 +58,11 @@ export function DeployForm({ type, initialAdmin, initialMintable }: DeployFormPr
   const [mintRateLimit, setMintRateLimit] = React.useState("");
   const [rateLimitWindow, setRateLimitWindow] = React.useState(0);
 
+  /** Only show validation errors after a field is touched or user attempted submit. */
+  const [touched, setTouched] = React.useState<Set<string>>(new Set());
+  const [submitted, setSubmitted] = React.useState(false);
+  const [progressOpen, setProgressOpen] = React.useState(initialProgressOpen);
+
   React.useEffect(() => {
     if (initialMintable != null) setMintable(initialMintable);
   }, [initialMintable]);
@@ -60,12 +76,25 @@ export function DeployForm({ type, initialAdmin, initialMintable }: DeployFormPr
     if (walletAddress) setAdmin(walletAddress);
   }, [walletAddress]);
 
-  /** Only show validation errors after a field is touched or user attempted submit. */
-  const [touched, setTouched] = React.useState<Set<string>>(new Set());
-  const [submitted, setSubmitted] = React.useState(false);
-  const [progressOpen, setProgressOpen] = React.useState(false);
+  const activeDeploy = useDeployProgressStore((s) => s.activeDeploy);
 
-  const now = Math.floor(Date.now() / 1000);
+  React.useEffect(() => {
+    if (!activeDeploy) return;
+    if (activeDeploy.type !== type) return;
+    const maxAgeMs = 60 * 60 * 1000; // 1 hour
+    if (Date.now() - activeDeploy.startedAt > maxAgeMs) return;
+    setProgressOpen(true);
+  }, [activeDeploy, type, setProgressOpen]);
+
+  // Allow header "Transaction in progress" button to re-open the modal
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setProgressOpen(true);
+    window.addEventListener(DEPLOY_PROGRESS_EVENT_NAME, handler);
+    return () => window.removeEventListener(DEPLOY_PROGRESS_EVENT_NAME, handler);
+  }, [setProgressOpen]);
+
+  const [now] = React.useState(() => Math.floor(Date.now() / 1000));
 
   const touch = React.useCallback((field: string) => {
     setTouched((prev) => (prev.has(field) ? prev : new Set(prev).add(field)));
@@ -209,7 +238,7 @@ export function DeployForm({ type, initialAdmin, initialMintable }: DeployFormPr
             value={cap}
             onChange={setCap}
             onBlur={() => touch("cap")}
-            placeholder="e.g. 1000"
+            placeholder="e.g. 1000000000000000000"
             error={showError("cap")}
             required
           />
@@ -290,6 +319,7 @@ export function DeployForm({ type, initialAdmin, initialMintable }: DeployFormPr
         onOpenChange={setProgressOpen}
         type={type}
         deployedAddress={deployedAddress}
+        mintableAddress={mintable}
         adminAddress={admin}
         walletAddress={walletAddress}
         error={deployError}

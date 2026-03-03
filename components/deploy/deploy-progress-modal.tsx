@@ -18,8 +18,7 @@ import {
   getBlockExplorerAddressUrl,
 } from "@/lib/utils";
 import type { MinterType } from "@/lib/types";
-
-const STEP_COUNT = 3;
+import { DeployStep, DEPLOY_STEP_COUNT } from "@/lib/hooks/useDeployMinter";
 
 const DEPLOY_ITEMS: {
   type: MinterType;
@@ -69,8 +68,23 @@ function randomDelay(minMs: number, maxMs: number): number {
   return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 
-/** Step index that failed when error is set (default: 1 = Deploying). */
-const FAILED_STEP_INDEX = 1;
+function getFriendlyErrorMessage(
+  error: Error,
+  failureIndex: number | null
+): string {
+  const raw = error?.message ?? String(error);
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("user rejected") || lower.includes("user denied")) {
+    return "User rejected the transaction in their wallet.";
+  }
+
+  if (failureIndex === DeployStep.Deploying) {
+    return "Transaction failed.";
+  }
+
+  return "Something went wrong. Please try again.";
+}
 
 export type DeployProgressModalProps = {
   open: boolean;
@@ -78,13 +92,15 @@ export type DeployProgressModalProps = {
   type?: string;
   /** Deployed contract address (mock until real deployment). */
   deployedAddress?: string | null;
+  /** Mintable token or mod address this deployment is attached to (for Grant Minter Role CTA). */
+  mintableAddress?: string;
   /** Admin address used for this deploy (for "Deploy another" prefill). */
   adminAddress: string;
   /** Connected wallet address (for "Confirmed via wallet" step). */
   walletAddress?: string | undefined;
   /** When set, the failed step (e.g. Deploying) shows a red X. */
   error?: Error | null;
-  /** Current deploy step from useDeployMinter (0–3). When isDeploying, modal uses this instead of timer. */
+  /** Current deploy step from useDeployMinter. When isDeploying, modal uses this instead of timer. */
   deployStep?: number;
   /** When true, progress is driven by deployStep; timer is disabled. */
   isDeploying?: boolean;
@@ -95,12 +111,14 @@ export function DeployProgressModal({
   onOpenChange,
   type,
   deployedAddress,
-  adminAddress,
+  mintableAddress,
+  adminAddress, // kept for API; passed by DeployForm for "Deploy another" prefill
   walletAddress,
   error,
-  deployStep = 0,
+  deployStep = DeployStep.ConfirmWallet,
   isDeploying = false,
 }: DeployProgressModalProps) {
+  void adminAddress;
   const chainId = useChainId();
   const chains = useChains();
   const network =
@@ -109,15 +127,16 @@ export function DeployProgressModal({
   const modLabel = getModLabel(type);
 
   // When deploy is in progress, use deployStep; when done with address, show all complete; else use local timer or error state
+  const failureIndex = error != null ? Math.min(deployStep, DEPLOY_STEP_COUNT - 1) : null;
   const resolvedIndex =
-    error != null
-      ? FAILED_STEP_INDEX
+    failureIndex != null
+      ? failureIndex
       : isDeploying
-        ? Math.min(deployStep, STEP_COUNT)
+        ? Math.min(deployStep, DEPLOY_STEP_COUNT)
         : deployedAddress
-          ? STEP_COUNT
+          ? DEPLOY_STEP_COUNT
           : activeIndex;
-  const isDone = resolvedIndex >= STEP_COUNT;
+  const isDone = resolvedIndex >= DEPLOY_STEP_COUNT;
 
   React.useEffect(() => {
     if (!open) {
@@ -128,11 +147,11 @@ export function DeployProgressModal({
 
   React.useEffect(() => {
     if (error != null || isDeploying || deployedAddress) return;
-    if (!open || activeIndex >= STEP_COUNT) return;
+    if (!open || activeIndex >= DEPLOY_STEP_COUNT) return;
 
     const delay = randomDelay(800, 1800);
     const t = setTimeout(() => {
-      setActiveIndex((i) => Math.min(i + 1, STEP_COUNT));
+      setActiveIndex((i) => Math.min(i + 1, DEPLOY_STEP_COUNT));
     }, delay);
 
     return () => clearTimeout(t);
@@ -149,6 +168,14 @@ export function DeployProgressModal({
     router.push(deployAnotherHref(t));
   };
 
+  const handleGrantMinterRole = () => {
+    if (!deployedAddress || !mintableAddress) return;
+    onOpenChange(false);
+    const from = encodeURIComponent(mintableAddress);
+    const to = encodeURIComponent(deployedAddress);
+    router.push(`/grant-role?from=${from}&to=${to}`);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -156,10 +183,10 @@ export function DeployProgressModal({
           <DialogTitle className="text-center mb-4">Deploy {modLabel}</DialogTitle>
         </DialogHeader>
         <ul className="space-y-3" role="list" aria-label="Deployment progress">
-          {Array.from({ length: STEP_COUNT }, (_, index) => {
+          {Array.from({ length: DEPLOY_STEP_COUNT }, (_, index) => {
             const isComplete = index < resolvedIndex;
             const isActive = index === resolvedIndex;
-            const isFailed = error != null && index === FAILED_STEP_INDEX;
+            const isFailed = error != null && index === failureIndex;
             const label = getStepLabel(index, isComplete && !isFailed, {
               type,
               modLabel,
@@ -218,7 +245,7 @@ export function DeployProgressModal({
                       </a>
                     </>
                   ) : isFailed && error ? (
-                    error.message
+                    getFriendlyErrorMessage(error, failureIndex)
                   ) : (
                     label
                   )}
@@ -230,40 +257,65 @@ export function DeployProgressModal({
 
         {(isDone && deployedAddress) || error ? (
           <div className="flex flex-col items-center gap-3 border-t pt-4">
-            {/* Other mods (exclude the one we just deployed) */}
-            {isDone && deployedAddress && type && (
+            {error ? (
               <>
-                <p className="text-center text-sm text-muted-foreground">
-                  Deploy and link another mod to this deployment
-                </p>
-                <div className="flex flex-nowrap items-center justify-center gap-2">
-                  {DEPLOY_ITEMS.filter((item) => item.type !== type).map(
-                    ({ type: t, label }) => (
-                      <Button
-                        key={t}
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5"
-                        onClick={() => handleDeployAnother(t)}
-                      >
-                        {label}
-                      </Button>
-                    )
-                  )}
-                </div>
+                <Link
+                  href="/"
+                  className="text-xs text-muted-foreground underline-offset-2 hover:opacity-80 flex mt-1"
+                >
+                  <ChevronLeft className="size-3 shrink-0 mt-0.5 pr-1" />
+                  Back to dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* Other mods (exclude the one we just deployed) */}
+                {isDone && deployedAddress && type && (
+                  <>
+                    <p className="text-center text-sm text-muted-foreground">
+                      Deploy and link another mod to this deployment
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {DEPLOY_ITEMS.filter((item) => item.type !== type).map(
+                        ({ type: t, label }) => (
+                          <Button
+                            key={t}
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => handleDeployAnother(t)}
+                          >
+                            {label}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
+                {isDone && deployedAddress && mintableAddress && (
+                  <div className="mt-4 flex flex-col items-center gap-2 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      You can now grant the minter role from your token or mod
+                      contract to this newly deployed mod.
+                    </p>
+                    <Button size="sm" onClick={handleGrantMinterRole}>
+                      Grant Minter Role
+                    </Button>
+                  </div>
+                )}
+                <Link
+                  href={
+                    deployedAddress
+                      ? `/?minter=${encodeURIComponent(deployedAddress)}`
+                      : "/"
+                  }
+                  className="text-sm font-medium text-primary underline-offset-2 hover:opacity-80 flex mt-4"
+                >
+                  <ChevronLeft className="size-4 shrink-0 mt-0.5 pr-1" />
+                  Back to dashboard
+                </Link>
               </>
             )}
-            <Link
-              href={
-                deployedAddress
-                  ? `/?minter=${encodeURIComponent(deployedAddress)}`
-                  : "/"
-              }
-              className="text-sm font-medium text-primary underline-offset-2 hover:opacity-80 flex mt-4"
-            >
-              <ChevronLeft className="size-4 shrink-0 mt-0.5 pr-1" />
-              Back to dashboard
-            </Link>
           </div>
         ) : (
           <div className="flex justify-center border-t pt-4">

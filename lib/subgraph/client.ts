@@ -20,8 +20,8 @@ export type ProgramTreeData = {
     id: string;
     status: string;
     root: ProgramTreeRoot;
-    minters: ProgramTreeMinter[];
   } | null;
+  minters: ProgramTreeMinter[];
 };
 
 export type ProgramListItem = {
@@ -45,14 +45,14 @@ const PROGRAM_TREE_DOCUMENT = `
         status
         level
       }
-      minters {
+    }
+    minters(where: { root: $rootAddress }) {
+      id
+      type
+      status
+      level
+      parent {
         id
-        type
-        status
-        level
-        parent {
-          id
-        }
       }
     }
   }
@@ -67,6 +67,18 @@ const PROGRAMS_LIST_DOCUMENT = `
     }
   }
 `;
+
+const MINTER_BY_ID_DOCUMENT = `
+  query MinterById($id: ID!) {
+    minter(id: $id) {
+      id
+    }
+  }
+`;
+
+export type MinterByIdData = {
+  minter: { id: string } | null;
+};
 
 async function fetchGraphQL<T>(document: string, variables?: Record<string, unknown>): Promise<T> {
   if (!SUBGRAPH_URL) {
@@ -98,4 +110,45 @@ export async function fetchProgramTree(rootAddress: string): Promise<ProgramTree
 
 export async function fetchProgramsList(): Promise<ProgramsListData> {
   return fetchGraphQL<ProgramsListData>(PROGRAMS_LIST_DOCUMENT);
+}
+
+/** Returns the minter if indexed, null otherwise. Used for post-deploy polling. */
+export async function fetchMinterById(
+  id: string
+): Promise<MinterByIdData["minter"]> {
+  const data = await fetchGraphQL<MinterByIdData>(MINTER_BY_ID_DOCUMENT, {
+    id: id.toLowerCase(),
+  });
+  return data.minter;
+}
+
+export type PollUntilIndexedOptions = {
+  /** Poll interval in ms. Default 2000. */
+  intervalMs?: number;
+  /** Max poll attempts before giving up. Default 30 (~60s at 2s interval). */
+  maxAttempts?: number;
+};
+
+/**
+ * Polls the subgraph until the minter is indexed or max attempts reached.
+ * Returns true if the minter was found, false if not set or gave up. Does not throw.
+ */
+export async function pollUntilMinterIndexed(
+  address: string,
+  options?: PollUntilIndexedOptions
+): Promise<boolean> {
+  if (!SUBGRAPH_URL) return false;
+  const { intervalMs = 2000, maxAttempts = 30 } = options ?? {};
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const minter = await fetchMinterById(address);
+      if (minter?.id) return true;
+    } catch {
+      // Subgraph error or network; keep polling
+    }
+    if (attempt < maxAttempts - 1) {
+      await new Promise((r) => setTimeout(r, intervalMs));
+    }
+  }
+  return false;
 }

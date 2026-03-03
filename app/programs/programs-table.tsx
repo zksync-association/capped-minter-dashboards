@@ -9,7 +9,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import {
   getBlockExplorerAddressUrl,
   cn,
@@ -18,11 +18,10 @@ import {
   truncateAddress,
 } from "@/lib/utils";
 import { useCappedMinterData, type ProgramRow } from "@/lib/hooks/useCappedMinterData";
-import type { ProgramConfig } from "@/lib/programs";
 
 type ProgramsTableProps = {
-  /** When a row is clicked, this program becomes the selected one (e.g. for graph). */
-  onRowSelect?: (program: ProgramConfig) => void;
+  /** When a row is clicked, this root becomes the selected one (e.g. for graph). */
+  onRowSelect?: (row: ProgramRow) => void;
   /** Root address of the currently selected program; row is highlighted when it matches. */
   selectedRootAddress?: `0x${string}` | null;
 };
@@ -32,12 +31,53 @@ export function ProgramsTable({
   selectedRootAddress = null,
 }: ProgramsTableProps = {}) {
   const { rows, isPending, error } = useCappedMinterData();
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "startTime", desc: true },
-  ]);
+  // Start with API-provided ordering (status, then startTime). Users can override via column headers.
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const columns = useMemo<ColumnDef<ProgramRow>[]>(
     () => [
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.original.status;
+          const config =
+            status === "active"
+              ? {
+                  label: "Active",
+                  Icon: CheckCircle2,
+                  className:
+                    "border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200",
+                }
+              : status === "fullyUsed"
+                ? {
+                    label: "Fully used",
+                    Icon: AlertTriangle,
+                    className:
+                      "border-amber-400 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200",
+                  }
+                : {
+                    label: "Expired",
+                    Icon: XCircle,
+                    className:
+                      "border-red-400 bg-red-50 text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200",
+                  };
+
+          const { Icon } = config;
+
+          return (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+                config.className
+              )}
+            >
+              <Icon className="size-3.5" aria-hidden />
+              {config.label}
+            </span>
+          );
+        },
+      },
       {
         accessorKey: "name",
         header: "Name",
@@ -77,7 +117,23 @@ export function ProgramsTable({
       {
         accessorKey: "minted",
         header: "Used",
-        cell: ({ row }) => formatTokenAmount(row.original.minted),
+        cell: ({ row }) => {
+          const { minted, cap } = row.original;
+          const amount = formatTokenAmount(minted);
+          const pct =
+            cap > 0n
+              ? (Number(minted) / Number(cap)) * 100
+              : 0;
+          const pctText = pct % 1 === 0 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
+          return (
+            <span>
+              {amount}
+              <span className="text-muted-foreground ml-1">
+                ({pctText})
+              </span>
+            </span>
+          );
+        },
       },
       {
         accessorKey: "startTime",
@@ -93,8 +149,6 @@ export function ProgramsTable({
     []
   );
 
-  // TanStack Table's useReactTable returns functions that React Compiler cannot memoize
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: rows,
     columns,
@@ -167,10 +221,7 @@ export function ProgramsTable({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row, rowIndex) => {
-            const isExpired = row.original.expirationTime < Date.now() / 1000;
-            const isFullyUsed =
-              row.original.minted >= row.original.cap;
-            const muted = isExpired || isFullyUsed;
+            const muted = row.original.status !== "active";
             const isSelected =
               selectedRootAddress != null &&
               row.original.rootAddress.toLowerCase() === selectedRootAddress.toLowerCase();

@@ -27,12 +27,16 @@ const LABELS: Record<MinterType, string> = {
 
 type PageProps = {
   params: Promise<{ type: string }>;
-  searchParams: Promise<{ admin?: string; mintable?: string }>;
+  searchParams: Promise<{ admin?: string; mintable?: string; showProgress?: string }>;
 };
 
 export default async function DeployPage({ params, searchParams }: PageProps) {
   const { type } = await params;
-  const { admin: adminFromUrl, mintable: mintableFromUrl } = await searchParams;
+  const {
+    admin: adminFromUrl,
+    mintable: mintableFromUrl,
+    showProgress,
+  } = await searchParams;
 
   if (!DEPLOY_TYPES.includes(type as MinterType)) {
     notFound();
@@ -65,10 +69,11 @@ export default async function DeployPage({ params, searchParams }: PageProps) {
           </CardHeader>
           <CardContent>
             <DeployForm
-            type={type as MinterType}
-            initialAdmin={adminFromUrl}
-            initialMintable={mintableFromUrl}
-          />
+              type={type as MinterType}
+              initialAdmin={adminFromUrl}
+              initialMintable={mintableFromUrl}
+              initialProgressOpen={Boolean(showProgress)}
+            />
           </CardContent>
         </Card>
       </main>
