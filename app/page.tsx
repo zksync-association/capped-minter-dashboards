@@ -4,19 +4,15 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProgramTreeView } from "./programs/program-tree-view";
 import { ProgramsTable } from "./programs/programs-table";
-import { getProgramsForChain } from "@/lib/programs";
-import { getChainId } from "@/lib/utils";
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const chainId = getChainId();
-  const programs = useMemo(() => getProgramsForChain(chainId), [chainId]);
 
   const selectedRootAddress = useMemo(() => {
     const root = searchParams.get("root");
     if (root && root.startsWith("0x")) return root as `0x${string}`;
-    return programs[0]?.rootAddresses?.[0] ?? null;
-  }, [searchParams, programs]);
+    return null;
+  }, [searchParams]);
 
   const handleRowSelect = (row: { rootAddress: `0x${string}` }) => {
     const url = `${window.location.pathname}?root=${encodeURIComponent(row.rootAddress)}`;

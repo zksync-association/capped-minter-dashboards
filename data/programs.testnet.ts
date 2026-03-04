@@ -1,9 +1,8 @@
 import type { ProgramConfig } from "@/lib/programs";
 
 /**
- * Authorized minter programs.
- * - Mainnet programs are sourced dynamically from the subgraph at runtime.
- * - Testnet programs remain hardcoded here.
+ * Authorized minter programs (testnet only).
+ * Mainnet programs are sourced dynamically from the subgraph at runtime.
  * Each program has one or more root minter addresses (rootAddresses) for its flow graph(s).
  */
 export const TESTNET_PROGRAMS: ProgramConfig[] = [
@@ -27,6 +26,14 @@ export const TESTNET_PROGRAMS: ProgramConfig[] = [
   },
 ];
 
-export const PROGRAMS: ProgramConfig[] = [
-  ...TESTNET_PROGRAMS,
-];
+export const TESTNET_PROGRAM_ROOTS: {
+  program: ProgramConfig;
+  rootAddress: `0x${string}`;
+}[] = TESTNET_PROGRAMS.flatMap((program) =>
+  program.rootAddresses.map((rootAddress) => ({
+    program,
+    rootAddress: rootAddress as `0x${string}`,
+  }))
+);
+
+

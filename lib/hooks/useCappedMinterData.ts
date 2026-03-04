@@ -3,9 +3,10 @@
 import { useMemo } from "react";
 import { useReadContracts } from "wagmi";
 import { zkCappedMinterAbi } from "@/lib/abis/zkCappedMinter";
-import { getProgramRootsForChain } from "@/lib/programs";
+import type { ProgramConfig } from "@/lib/programs";
 import { getChainId } from "@/lib/utils";
 import { useMainnetProgramRoots } from "@/lib/hooks/useMainnetPrograms";
+import { TESTNET_PROGRAM_ROOTS } from "@/data/programs.testnet";
 
 export type ProgramStatus = "active" | "fullyUsed" | "expired";
 
@@ -36,12 +37,7 @@ export function useCappedMinterData(): {
     error: mainnetError,
   } = useMainnetProgramRoots(isMainnet);
 
-  const staticProgramRoots = useMemo(
-    () => getProgramRootsForChain(chainId),
-    [chainId]
-  );
-
-  const programRoots = isMainnet ? mainnetProgramRoots : staticProgramRoots;
+  const programRoots = isMainnet ? mainnetProgramRoots : TESTNET_PROGRAM_ROOTS;
 
   const contracts = useMemo(() => {
     const list: Array<{
@@ -80,7 +76,14 @@ export function useCappedMinterData(): {
       expired: 2,
     };
 
-    const unsorted: ProgramRow[] = programRoots.map(({ program, rootAddress }, i) => {
+    const unsorted: ProgramRow[] = programRoots.map(
+      (
+        {
+          program,
+          rootAddress,
+        }: { program: ProgramConfig; rootAddress: `0x${string}` },
+        i: number
+      ) => {
       const base = i * 4;
       const cap = (data[base]?.result ?? 0n) as bigint;
       const minted = (data[base + 1]?.result ?? 0n) as bigint;

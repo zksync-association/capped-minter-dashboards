@@ -1,20 +1,20 @@
-\"use client\";
+"use client";
 
-import { useMemo } from \"react\";
-import { useQuery } from \"@tanstack/react-query\";
-import type { ProgramConfig } from \"@/lib/programs\";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { ProgramConfig } from "@/lib/programs";
 import {
   fetchProgramsWithProposals,
   type ProgramsWithProposalsData,
   type SubgraphProgram,
-} from \"@/lib/subgraph/client\";
+} from "@/lib/subgraph/client";
 
 const MAINNET_CHAIN_ID = 324;
 
 function getGovernanceProposalBaseUrl(): string {
   return (
     process.env.NEXT_PUBLIC_GOVERNANCE_PROPOSAL_BASE_URL ??
-    \"https://www.tally.xyz/gov/zksync/proposal/\"
+    "https://www.tally.xyz/gov/zksync/proposal/"
   );
 }
 
@@ -22,7 +22,7 @@ function mapSubgraphProgramToConfig(program: SubgraphProgram): ProgramConfig {
   const proposal = program.proposal;
   const baseUrl = getGovernanceProposalBaseUrl();
   const proposalUrl =
-    proposal != null ? `${baseUrl}${proposal.proposalId}` : \"\";
+    proposal != null ? `${baseUrl}${proposal.proposalId}` : "";
 
   const name =
     proposal?.name?.trim()?.length ? proposal.name : `Program ${program.id}`;
@@ -46,7 +46,7 @@ export function useMainnetPrograms(enabled: boolean) {
   const hasSubgraph = Boolean(process.env.NEXT_PUBLIC_SUBGRAPH_URL);
 
   const query = useQuery({
-    queryKey: [\"mainnetProgramsWithProposals\"],
+    queryKey: ["mainnetProgramsWithProposals"],
     queryFn: async () => {
       const data: ProgramsWithProposalsData = await fetchProgramsWithProposals();
       return data.programs.map(mapSubgraphProgramToConfig);

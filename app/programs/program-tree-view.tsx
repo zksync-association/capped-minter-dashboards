@@ -2,9 +2,10 @@
 
 import { useMemo } from "react";
 import { ProgramFlow } from "@/components/program-flow";
-import { getProgramsForChain } from "@/lib/programs";
 import { getChainId } from "@/lib/utils";
 import { useProgramTree, programTreeToFlow } from "@/lib/hooks/useProgramTree";
+import { useMainnetProgramRoots } from "@/lib/hooks/useMainnetPrograms";
+import { TESTNET_PROGRAM_ROOTS } from "@/data/programs.testnet";
 
 type ProgramTreeViewProps = {
   /** When set, shows the graph for this program's root. Otherwise first program's graph. */
@@ -15,13 +16,17 @@ export function ProgramTreeView({
   selectedProgramRootAddress = null,
 }: ProgramTreeViewProps) {
   const chainId = getChainId();
-  const programs = useMemo(
-    () => getProgramsForChain(chainId),
-    [chainId]
-  );
+  const isMainnet = chainId === 324;
+
+  const {
+    programRoots: mainnetProgramRoots,
+  } = useMainnetProgramRoots(isMainnet);
+
+  const programRoots = isMainnet ? mainnetProgramRoots : TESTNET_PROGRAM_ROOTS;
+
   const rootToShow =
     selectedProgramRootAddress ??
-    programs[0]?.rootAddresses?.[0] ??
+    programRoots[0]?.rootAddress ??
     null;
 
   const { data: programTreeData, isPending } = useProgramTree(
