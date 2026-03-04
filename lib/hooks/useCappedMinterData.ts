@@ -5,6 +5,7 @@ import { useReadContracts } from "wagmi";
 import { zkCappedMinterAbi } from "@/lib/abis/zkCappedMinter";
 import { getProgramRootsForChain } from "@/lib/programs";
 import { getChainId } from "@/lib/utils";
+import { useMainnetProgramRoots } from "@/lib/hooks/useMainnetPrograms";
 
 export type ProgramStatus = "active" | "fullyUsed" | "expired";
 
@@ -27,10 +28,20 @@ export function useCappedMinterData(): {
   error: Error | null;
 } {
   const chainId = getChainId();
-  const programRoots = useMemo(
+  const isMainnet = chainId === 324;
+
+  const {
+    programRoots: mainnetProgramRoots,
+    isPending: isMainnetPending,
+    error: mainnetError,
+  } = useMainnetProgramRoots(isMainnet);
+
+  const staticProgramRoots = useMemo(
     () => getProgramRootsForChain(chainId),
     [chainId]
   );
+
+  const programRoots = isMainnet ? mainnetProgramRoots : staticProgramRoots;
 
   const contracts = useMemo(() => {
     const list: Array<{
@@ -50,9 +61,13 @@ export function useCappedMinterData(): {
     return list;
   }, [programRoots, chainId]);
 
-  const { data, isPending, error } = useReadContracts({
+  const { data, isPending: isContractsPending, error: contractsError } = useReadContracts({
     contracts,
-    query: { enabled: contracts.length > 0 },
+    query: {
+      enabled:
+        contracts.length > 0 &&
+        (!isMainnet || (!isMainnetPending && !mainnetError)),
+    },
   });
 
   const rows = useMemo((): ProgramRow[] => {
@@ -104,5 +119,11 @@ export function useCappedMinterData(): {
     return unsorted;
   }, [data, programRoots]);
 
-  return { rows, isPending, error: error ?? null };
+  const combinedPending = isMainnet
+    ? isMainnetPending || isContractsPending
+    : isContractsPending;
+
+  const combinedError = (mainnetError ?? contractsError) ?? null;
+
+  return { rows, isPending: combinedPending, error: combinedError };
 }

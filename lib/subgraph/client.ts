@@ -34,6 +34,25 @@ export type ProgramsListData = {
   programs: ProgramListItem[];
 };
 
+export type SubgraphProposal = {
+  id: string;
+  proposalId: string;
+  name: string;
+  status: string;
+};
+
+export type SubgraphProgram = {
+  id: string;
+  status: string;
+  createdAt: string;
+  root: ProgramTreeRoot;
+  proposal: SubgraphProposal | null;
+};
+
+export type ProgramsWithProposalsData = {
+  programs: SubgraphProgram[];
+};
+
 const PROGRAM_TREE_DOCUMENT = `
   query ProgramTree($rootAddress: Bytes!) {
     program(id: $rootAddress) {
@@ -64,6 +83,33 @@ const PROGRAMS_LIST_DOCUMENT = `
       id
       createdAt
       status
+    }
+  }
+`;
+
+const PROGRAMS_WITH_PROPOSALS_DOCUMENT = `
+  query ProgramsWithProposals {
+    programs(
+      first: 100
+      orderBy: createdAt
+      orderDirection: desc
+      where: { status: "active" }
+    ) {
+      id
+      status
+      createdAt
+      root {
+        id
+        type
+        status
+        level
+      }
+      proposal {
+        id
+        proposalId
+        name
+        status
+      }
     }
   }
 `;
@@ -110,6 +156,10 @@ export async function fetchProgramTree(rootAddress: string): Promise<ProgramTree
 
 export async function fetchProgramsList(): Promise<ProgramsListData> {
   return fetchGraphQL<ProgramsListData>(PROGRAMS_LIST_DOCUMENT);
+}
+
+export async function fetchProgramsWithProposals(): Promise<ProgramsWithProposalsData> {
+  return fetchGraphQL<ProgramsWithProposalsData>(PROGRAMS_WITH_PROPOSALS_DOCUMENT);
 }
 
 /** Returns the minter if indexed, null otherwise. Used for post-deploy polling. */

@@ -1,36 +1,11 @@
 import type { ProgramConfig } from "@/lib/programs";
 
 /**
- * Authorized minter programs. Updated via PRs when new programs are approved by governance.
+ * Authorized minter programs.
+ * - Mainnet programs are sourced dynamically from the subgraph at runtime.
+ * - Testnet programs remain hardcoded here.
  * Each program has one or more root minter addresses (rootAddresses) for its flow graph(s).
  */
- const MAINNET_PROGRAMS: ProgramConfig[] = [
-  {
-    name: "ZKnomics Token Staking",
-    proposalUrl: "https://www.tally.xyz/gov/zksync/proposal/97314764080859415498674952864578860560861880297360481348949362100730414449748",
-    rootAddresses: ["0xb1c5f8ea8cE447FDaFB234D85EAD8c8A83b6306B"],
-    chainId: 324,
-  },
-  {
-    name: "Unknown Proposal 1",
-    proposalUrl: "https://www.tally.xyz/gov/zksync/proposal/todo",
-    rootAddresses: ["0x51e818785dea065d392ac21f04e9cac5b601cfd8"],
-    chainId: 324,
-  },
-  {
-    name: "Unknown Proposal 2",
-    proposalUrl: "https://www.tally.xyz/gov/zksync/proposal/todo",
-    rootAddresses: ["0x1e386bc1fc6556c831371816f0a62705189939a1"],
-    chainId: 324,
-  },
-  {
-    name: "Unknown Proposal 3",
-    proposalUrl: "https://www.tally.xyz/gov/zksync/proposal/todo",
-    rootAddresses: ["0xcfa355a6678a38c401b89bf44c6f98af5a98572b"],
-    chainId: 324,
-  }
-];
-
 export const TESTNET_PROGRAMS: ProgramConfig[] = [
   {
     name: "1 Mod",
@@ -53,6 +28,5 @@ export const TESTNET_PROGRAMS: ProgramConfig[] = [
 ];
 
 export const PROGRAMS: ProgramConfig[] = [
-  ...MAINNET_PROGRAMS,
   ...TESTNET_PROGRAMS,
 ];
