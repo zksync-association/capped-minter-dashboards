@@ -32,7 +32,7 @@ const DEPLOY_ITEMS: {
   icon: LucideIcon;
 }[] = [
   { href: "/deploy/capped-v3", label: "Capped Minter V3", icon: Layers },
-  { href: "/deploy/capped-v2", label: "Capped Minter V2", icon: Box },
+  // { href: "/deploy/capped-v2", label: "Capped Minter V2", icon: Box },
   { href: "/deploy/delay", label: "Delay Minter Mod", icon: Clock },
   { href: "/deploy/rate-limit", label: "Rate Limit Mod", icon: Gauge },
 ];

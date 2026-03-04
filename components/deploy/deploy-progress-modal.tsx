@@ -25,7 +25,7 @@ const DEPLOY_ITEMS: {
   label: string;
 }[] = [
   { type: "capped-v3", label: "Capped Minter V3" },
-  { type: "capped-v2", label: "Capped Minter V2" },
+  // { type: "capped-v2", label: "Capped Minter V2" },
   { type: "delay", label: "Delay Minter Mod" },
   { type: "rate-limit", label: "Rate Limit Mod" },
 ];
