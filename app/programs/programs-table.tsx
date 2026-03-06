@@ -17,6 +17,12 @@ import {
   formatDate,
   truncateAddress,
 } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useCappedMinterData, type ProgramRow } from "@/lib/hooks/useCappedMinterData";
 
 type ProgramsTableProps = {
@@ -110,40 +116,98 @@ export function ProgramsTable({
         },
       },
       {
-        accessorKey: "cap",
-        header: "Approved",
-        cell: ({ row }) => formatTokenAmount(row.original.cap),
-      },
-      {
-        accessorKey: "minted",
-        header: "Used",
+        accessorKey: "usagePercent",
+        header: "Usage",
         cell: ({ row }) => {
           const { minted, cap } = row.original;
           const amount = formatTokenAmount(minted);
-          const pct =
-            cap > 0n
-              ? (Number(minted) / Number(cap)) * 100
-              : 0;
-          const pctText = pct % 1 === 0 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
+          const approved = formatTokenAmount(cap);
+          const remaining =
+            cap > minted ? formatTokenAmount(cap - minted) : "0 ZK";
+          const pct = row.original.usagePercent;
+          const pctText =
+            pct % 1 === 0 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
           return (
-            <span>
-              {amount}
-              <span className="text-muted-foreground ml-1">
-                ({pctText})
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="whitespace-nowrap">
+                    {amount}
+                    <span className="text-muted-foreground ml-1">
+                      ({pctText})
+                    </span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground text-xs">
+                        Approved
+                      </span>
+                      <span className="text-xs">{approved}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground text-xs">
+                        Remaining
+                      </span>
+                      <span className="text-xs">{remaining}</span>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+      },
+      {
+        id: "startTime",
+        header: "Start",
+        accessorFn: (row) => {
+          const { startTime } = row;
+          return startTime || undefined;
+        },
+        sortUndefined: "last",
+        cell: ({ row }) => {
+          const { startTime } = row.original;
+          if (!startTime) {
+            return (
+              <span className="text-muted-foreground whitespace-nowrap">
+                N/A
               </span>
+            );
+          }
+
+          return (
+            <span className="whitespace-nowrap">
+              {formatDate(startTime)}
             </span>
           );
         },
       },
       {
-        accessorKey: "startTime",
-        header: "Start",
-        cell: ({ row }) => formatDate(row.original.startTime),
-      },
-      {
-        accessorKey: "expirationTime",
+        id: "expirationTime",
         header: "End",
-        cell: ({ row }) => formatDate(row.original.expirationTime),
+        accessorFn: (row) => {
+          const { expirationTime } = row;
+          return expirationTime || undefined;
+        },
+        sortUndefined: "last",
+        cell: ({ row }) => {
+          const { expirationTime } = row.original;
+          if (!expirationTime) {
+            return (
+              <span className="text-muted-foreground whitespace-nowrap">
+                N/A
+              </span>
+            );
+          }
+
+          return (
+            <span className="whitespace-nowrap">
+              {formatDate(expirationTime)}
+            </span>
+          );
+        },
       },
     ],
     []
@@ -185,7 +249,7 @@ export function ProgramsTable({
 
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-border bg-card">
-      <table className="w-full text-left text-sm">
+      <table className="w-full text-left text-xs md:text-sm">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="border-b border-border bg-muted/40">
@@ -196,7 +260,7 @@ export function ProgramsTable({
                   <th
                     key={header.id}
                     className={cn(
-                      "px-4 py-3.5 font-semibold text-foreground",
+                      "px-3 py-2.5 font-semibold text-foreground",
                       canSort && "cursor-pointer select-none hover:bg-muted/60"
                     )}
                     onClick={header.column.getToggleSortingHandler()}
@@ -251,7 +315,7 @@ export function ProgramsTable({
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3.5">
+                  <td key={cell.id} className="px-3 py-2.5">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

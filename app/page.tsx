@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProgramTreeView } from "./programs/program-tree-view";
 import { ProgramsTable } from "./programs/programs-table";
 
 export default function Home() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const selectedRootAddress = useMemo(() => {
@@ -14,10 +15,16 @@ export default function Home() {
     return null;
   }, [searchParams]);
 
-  const handleRowSelect = (row: { rootAddress: `0x${string}` }) => {
-    const url = `${window.location.pathname}?root=${encodeURIComponent(row.rootAddress)}`;
-    window.location.href = url;
-  };
+  const handleRowSelect = useCallback(
+    (row: { rootAddress: `0x${string}` }) => {
+      // Use Next.js client-side navigation to avoid full page reloads.
+      router.replace(
+        `/?root=${encodeURIComponent(row.rootAddress)}`,
+        { scroll: false }
+      );
+    },
+    [router]
+  );
 
   return (
     <div className="min-h-screen bg-background font-sans">

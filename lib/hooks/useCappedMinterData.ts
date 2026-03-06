@@ -17,6 +17,8 @@ export type ProgramRow = {
   rootAddress: `0x${string}`;
   cap: bigint;
   minted: bigint;
+  /** Percent of cap used (0–100). Used for sorting. */
+  usagePercent: number;
   startTime: number;
   expirationTime: number;
   status: ProgramStatus;
@@ -90,6 +92,9 @@ export function useCappedMinterData(): {
       const startTime = Number((data[base + 2]?.result ?? 0n) as bigint);
       const expirationTime = Number((data[base + 3]?.result ?? 0n) as bigint);
 
+      const usagePercent =
+        cap > 0n ? (Number(minted) / Number(cap)) * 100 : 0;
+
       let status: ProgramStatus;
       if (expirationTime < nowSeconds) {
         status = "expired";
@@ -106,6 +111,7 @@ export function useCappedMinterData(): {
         rootAddress,
         cap,
         minted,
+        usagePercent,
         startTime,
         expirationTime,
         status,

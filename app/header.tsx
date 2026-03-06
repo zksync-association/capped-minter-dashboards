@@ -124,7 +124,7 @@ export function Header() {
               </Link>
             </Button>
           )}
-          <ConnectButton chainStatus="none" showBalance={false} />
+          <ConnectButton showBalance={false} />
           <ThemeToggle />
           <Link
             href="/how-to"

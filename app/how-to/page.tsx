@@ -179,36 +179,6 @@ export default function HowToPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Open a PR to include your program</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm text-muted-foreground">
-            <ul className="list-disc space-y-1 pl-5">
-              <li>
-                After governance approval, open a PR editing{" "}
-                <Link
-                  href="https://github.com/ScopeLift/capped-minter-dashboard/blob/main/data/programs.ts"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline underline-offset-2 hover:opacity-80"
-                >
-                  <code>data/programs.ts</code>
-                </Link>
-                .
-              </li>
-              <li>
-                Add your program name, proposal URL, chainId, and one or more
-                root capped minter addresses.
-              </li>
-              <li>
-                Once merged and deployed, your program will appear in the
-                Programs table and flow graph.
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );
