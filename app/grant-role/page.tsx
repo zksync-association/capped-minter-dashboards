@@ -94,20 +94,20 @@ export default function GrantRolePage() {
         Grant Minter Role
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Grant <code>MINTER_ROLE</code> from a token or mod contract to a
-        minter mod. Use this after deploying a mod so it can mint, or when
-        chaining mods together.
+        Grant <code>MINTER_ROLE</code> from a token or minter contract (capped
+        minter or mod) to another minter contract. Use this after deploying a
+        capped minter or mod so it can mint, or when chaining them together.
       </p>
       <div className="mt-6 space-y-4">
         <AddressField
-          label="From contract (token or mod) address"
+          label="From contract (token, capped minter, or mod) address"
           value={fromAddress}
           onChange={setFromAddress}
           error={fromError}
           placeholder="0x..."
         />
         <AddressField
-          label="To minter (mod) address"
+          label="To minter contract address"
           value={toAddress}
           onChange={setToAddress}
           error={toError}

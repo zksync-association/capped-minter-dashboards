@@ -33,9 +33,15 @@ export default function Home() {
           <ProgramTreeView selectedProgramRootAddress={selectedRootAddress} />
         </section>
         <section>
-          <h2 className="mb-4 text-xl font-semibold text-foreground">
-            Programs
+          <h2 className="mb-2 text-xl font-semibold text-foreground">
+            ZKsync Token Programs
           </h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            The following table displays all parent capped minters from all
+            Token Programs approved through the ZKsync governance system. The
+            image above will display all child capped minters (if any) for each
+            program.
+          </p>
           <ProgramsTable
             onRowSelect={handleRowSelect}
             selectedRootAddress={selectedRootAddress}

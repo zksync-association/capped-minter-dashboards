@@ -86,7 +86,7 @@ export function ProgramsTable({
       },
       {
         accessorKey: "name",
-        header: "Name",
+        header: "Token Program Proposal",
         cell: ({ row }) => (
           <a
             href={row.original.proposalUrl}
@@ -100,7 +100,7 @@ export function ProgramsTable({
       },
       {
         accessorKey: "rootAddress",
-        header: "Address",
+        header: "Parent Address",
         cell: ({ row }) => {
           const url = getBlockExplorerAddressUrl(row.original.rootAddress);
           return (
@@ -117,7 +117,7 @@ export function ProgramsTable({
       },
       {
         accessorKey: "usagePercent",
-        header: "Usage",
+        header: "Total Minted",
         cell: ({ row }) => {
           const { minted, cap } = row.original;
           const amount = formatTokenAmount(minted);
@@ -158,6 +158,15 @@ export function ProgramsTable({
             </TooltipProvider>
           );
         },
+      },
+      {
+        accessorKey: "cap",
+        header: "Total Cap",
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">
+            {formatTokenAmount(row.original.cap)}
+          </span>
+        ),
       },
       {
         id: "startTime",

@@ -269,11 +269,11 @@ export function DeployProgressModal({
               </>
             ) : (
               <>
-                {/* Other mods (exclude the one we just deployed) */}
+                {/* Other minter types (exclude the one we just deployed) */}
                 {isDone && deployedAddress && type && (
                   <>
                     <p className="text-center text-sm text-muted-foreground">
-                      Deploy and link another mod to this deployment
+                      Deploy and link another capped minter or mod to this deployment
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       {DEPLOY_ITEMS.filter((item) => item.type !== type).map(
@@ -295,8 +295,8 @@ export function DeployProgressModal({
                 {isDone && deployedAddress && mintableAddress && (
                   <div className="mt-4 flex flex-col items-center gap-2 text-center">
                     <p className="text-sm text-muted-foreground">
-                      You can now grant the minter role from your token or mod
-                      contract to this newly deployed mod.
+                      You can now grant the minter role from your token or minter
+                      contract to this newly deployed contract.
                     </p>
                     <Button size="sm" onClick={handleGrantMinterRole}>
                       Grant Minter Role

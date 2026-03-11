@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Capped Minter",
+  title: "ZKsync Token Program Capped Minter Overview",
   description: "Capped Minter Dashboard",
 };
 

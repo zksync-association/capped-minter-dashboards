@@ -63,7 +63,7 @@ export function Header() {
             href="/"
             className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
           >
-            Capped Minter
+            ZKsync Token Program Capped Minter Overview
           </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

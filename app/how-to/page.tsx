@@ -36,12 +36,12 @@ export default function HowToPage() {
             How to use the Capped Minter dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Quick guide for deploying mods, chaining them, granting roles, and
-            registering programs.
+            Quick guide for deploying capped minters and mods, chaining them,
+            granting roles, and registering programs.
           </p>
           <ul className="mt-2 text-sm text-muted-foreground list-disc pl-5 space-y-1">
-            <li>Create a mod from the header Deploy menu.</li>
-            <li>Chain mods by deploying the next mod with mintable set to the last mod.</li>
+            <li>Create a capped minter or mod from the header Deploy menu.</li>
+            <li>Chain minter contracts by deploying the next with mintable set to the previous one.</li>
             <li>Grant roles via the Grant role page or post-deploy prompt.</li>
             <li>Addresses and PR instructions are listed below.</li>
           </ul>
@@ -49,17 +49,17 @@ export default function HowToPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Create a mod</CardTitle>
+            <CardTitle>Create a capped minter or mod</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm text-muted-foreground">
             <ol className="list-decimal space-y-1 pl-5">
               <li>
                 From the header <span className="font-medium">Deploy</span>{" "}
-                menu, pick a mod type.
+                menu, pick a type (capped minter or mod).
               </li>
               <li>
                 Enter <span className="font-medium">mintable</span> (token or
-                upstream mod), <span className="font-medium">admin</span>, and
+                upstream minter contract), <span className="font-medium">admin</span>, and
                 any type-specific params.
               </li>
               <li>
@@ -70,8 +70,8 @@ export default function HowToPage() {
               <li>
                 When prompted, use{" "}
                 <span className="font-medium">Grant Minter Role</span> to assign{" "}
-                <code>MINTER_ROLE</code> from your token or upstream mod to the
-                new mod.
+                <code>MINTER_ROLE</code> from your token or upstream minter to the
+                newly deployed contract.
               </li>
             </ol>
           </CardContent>
@@ -79,27 +79,27 @@ export default function HowToPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>How to chain mods</CardTitle>
+            <CardTitle>How to chain capped minters & mods</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm text-muted-foreground">
             <ol className="list-decimal space-y-1 pl-5">
               <li>
-                Deploy the first mod with{" "}
+                Deploy the first minter (e.g. a capped minter) with{" "}
                 <span className="font-medium">mintable</span> set to your token.
               </li>
               <li>
                 In the deploy progress modal, use{" "}
-                <span className="font-medium">Deploy and link another mod</span>{" "}
+                <span className="font-medium">Deploy and link another minter</span>{" "}
                 to prefill the next deploy form so{" "}
                 <span className="font-medium">mintable</span> is the previous
-                mod.
+                contract.
               </li>
               <li>
-                Repeat to add more mods (for example, a rate limit mod wrapping
+                Repeat to add more (for example, a rate limit mod wrapping
                 a capped minter).
               </li>
               <li>
-                Grant roles in order: token → first mod → second mod → … using
+                Grant roles in order: token → first minter → second minter → … using
                 the <span className="font-medium">Grant role</span> page when
                 needed.
               </li>
@@ -115,7 +115,7 @@ export default function HowToPage() {
             <ul className="list-disc space-y-1 pl-5">
               <li>
                 After each deploy, grant <code>MINTER_ROLE</code> from the
-                upstream contract to the new mod so it can mint.
+                upstream contract to the new minter contract so it can mint.
               </li>
               <li>
                 When chaining, grant roles between every pair in the flow
@@ -123,7 +123,7 @@ export default function HowToPage() {
               </li>
               <li>
                 Use the <span className="font-medium">Grant role</span> page
-                any time you need to rotate mods or extend an existing chain.
+                any time you need to rotate minter contracts or extend an existing chain.
               </li>
             </ul>
           </CardContent>
