@@ -10,9 +10,22 @@ import { ThemeProvider } from "./theme-provider";
 
 const queryClient = new QueryClient();
 
+const RAINBOW_LIGHT_THEME = lightTheme({
+  accentColor: "#0C18EC",
+  accentColorForeground: "white",
+  borderRadius: "medium",
+});
+
+const RAINBOW_DARK_THEME = darkTheme({
+  accentColor: "#8897F2",
+  accentColorForeground: "#0a0a0a",
+  borderRadius: "medium",
+});
+
 function RainbowKitWithTheme({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === "dark" ? darkTheme() : lightTheme();
+  const theme =
+    resolvedTheme === "dark" ? RAINBOW_DARK_THEME : RAINBOW_LIGHT_THEME;
 
   return <RainbowKitProvider theme={theme}>{children}</RainbowKitProvider>;
 }

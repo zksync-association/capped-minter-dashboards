@@ -14,7 +14,7 @@ export type MinterNodeData = {
 export type MinterNode = Node<MinterNodeData, "minter">;
 
 const statusBorderClass: Record<MinterNodeData["status"], string> = {
-  Active: "border-green-500",
+  Active: "border-brand-500",
   Revoked: "border-red-500",
   Closed: "border-gray-500",
 };

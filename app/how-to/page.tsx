@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -31,10 +32,18 @@ export default function HowToPage() {
   return (
     <div className="min-h-screen bg-background font-sans">
       <main className="mx-auto w-full max-w-4xl px-6 py-12 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-semibold text-foreground">
-            How to use the Capped Minter dashboard
-          </h1>
+        <header className="space-y-2 flex items-start gap-3">
+          <Image
+            src="/brand/icons/docs.svg"
+            alt=""
+            width={40}
+            height={40}
+            className="shrink-0 mt-0.5"
+          />
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">
+              How to use the ZKsync Token Program Capped Minter Overview
+            </h1>
           <p className="text-sm text-muted-foreground">
             Quick guide for deploying capped minters and mods, chaining them,
             granting roles, and registering programs.
@@ -45,6 +54,7 @@ export default function HowToPage() {
             <li>Grant roles via the Grant role page or post-deploy prompt.</li>
             <li>Addresses and PR instructions are listed below.</li>
           </ul>
+          </div>
         </header>
 
         <Card>

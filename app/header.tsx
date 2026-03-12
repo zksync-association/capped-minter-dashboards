@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ChevronDown,
   Clock,
   Gauge,
   Layers,
-  Box,
   KeyRound,
   type LucideIcon,
   CircleQuestionMarkIcon,
@@ -56,21 +56,38 @@ export function Header() {
   const resolveDeployHref = (type: MinterType) => `/deploy/${type}?showProgress=true`;
 
   return (
-    <header className="w-full">
+    <header className="w-full bg-background">
       <div className="flex items-center justify-between gap-4 px-6 py-4">
         <nav className="flex items-center gap-6">
           <Link
             href="/"
-            className="text-lg font-semibold text-zinc-900 dark:text-zinc-50"
+            className="flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+            aria-label="ZKsync Token Program Capped Minter Overview"
           >
-            ZKsync Token Program Capped Minter Overview
+            <Image
+              src="/brand/logo-blue.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="dark:hidden h-8 w-auto"
+            />
+            <Image
+              src="/brand/logo-dark-blue.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="hidden dark:block h-8 w-auto"
+            />
+            <span className="text-sm font-semibold text-foreground hidden sm:inline">
+              ZKsync Capped Minter
+            </span>
           </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground hover:text-foreground"
+                className="gap-1 text-muted-foreground hover:text-brand-500 hover:bg-brand-100 dark:hover:text-brand-300 dark:hover:bg-white/10"
               >
                 Deploy
                 <ChevronDown className="size-4" />
@@ -89,7 +106,7 @@ export function Header() {
           </DropdownMenu>
           <Link
             href="/grant-role"
-            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            className="text-sm text-muted-foreground hover:text-brand-500 dark:hover:text-brand-300 flex items-center gap-1 transition-colors"
           >
             <KeyRound className="size-4" />
             Grant role
@@ -128,13 +145,14 @@ export function Header() {
           <ThemeToggle />
           <Link
             href="/how-to"
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm text-muted-foreground hover:text-brand-500 dark:hover:text-brand-300 transition-colors"
+            aria-label="How to"
           >
             <CircleQuestionMarkIcon className="size-4" />
           </Link>
         </div>
       </div>
-      <Separator />
+      <Separator className="dark:border-white/10" />
     </header>
   );
 }

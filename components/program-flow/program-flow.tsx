@@ -19,6 +19,7 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import dagre from "dagre";
 import { ProgramFlowNode } from "./program-flow-node";
 import { getBlockExplorerAddressUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import "@xyflow/react/dist/style.css";
 
@@ -123,7 +124,10 @@ function ProgramFlowInner({
 
   if (loading) {
     return (
-      <div className={className} style={{ height: 400 }}>
+      <div
+        className={cn(className, "bg-brand-100/30 dark:bg-white/[0.03]")}
+        style={{ height: 400 }}
+      >
         <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted/30">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
@@ -132,7 +136,10 @@ function ProgramFlowInner({
   }
 
   return (
-    <div className={className} style={{ height: 400 }}>
+    <div
+      className={cn(className, "bg-brand-100/20 dark:bg-white/[0.04]")}
+      style={{ height: 400 }}
+    >
       <ReactFlow
         colorMode={mounted && resolvedTheme === "dark" ? "dark" : "light"}
         nodes={nodes}

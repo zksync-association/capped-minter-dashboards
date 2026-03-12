@@ -122,8 +122,9 @@ export function ProgramsTable({
           const { minted, cap } = row.original;
           const amount = formatTokenAmount(minted);
           const approved = formatTokenAmount(cap);
+          const hasRemaining = cap > minted;
           const remaining =
-            cap > minted ? formatTokenAmount(cap - minted) : "0 ZK";
+            hasRemaining ? formatTokenAmount(cap - minted) : "0 ZK";
           const pct = row.original.usagePercent;
           const pctText =
             pct % 1 === 0 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
@@ -141,16 +142,27 @@ export function ProgramsTable({
                 <TooltipContent>
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-muted-foreground text-xs">
+                      <span className="text-brand-500 dark:text-brand-300 text-xs font-medium">
                         Approved
                       </span>
-                      <span className="text-xs">{approved}</span>
+                      <span className="text-xs font-medium text-foreground">
+                        {approved}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground text-xs">
                         Remaining
                       </span>
-                      <span className="text-xs">{remaining}</span>
+                      <span
+                        className={cn(
+                          "text-xs font-medium",
+                          hasRemaining
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {remaining}
+                      </span>
                     </div>
                   </div>
                 </TooltipContent>
