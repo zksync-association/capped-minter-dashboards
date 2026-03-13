@@ -79,7 +79,7 @@ export function Header() {
               className="hidden dark:block h-8 w-auto"
             />
             <span className="text-sm font-semibold text-foreground hidden sm:inline">
-              ZKsync Capped Minter
+              ZKsync Token Program Capped Minter Overview
             </span>
           </Link>
           <DropdownMenu>

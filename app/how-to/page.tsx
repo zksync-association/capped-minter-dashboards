@@ -42,7 +42,7 @@ export default function HowToPage() {
           />
           <div>
             <h1 className="text-2xl font-semibold text-foreground">
-              How to use the ZKsync Token Program Capped Minter Overview
+              How to use the ZK Minter Deployment Interface
             </h1>
           <p className="text-sm text-muted-foreground">
             Quick guide for deploying capped minters and mods, chaining them,
