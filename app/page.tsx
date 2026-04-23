@@ -5,8 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { ProgramTreeView } from "./programs/program-tree-view";
 import { ProgramsTable } from "./programs/programs-table";
+import { getChainId } from "@/lib/utils";
 
 export default function Home() {
+  const isTestnet = getChainId() === 300;
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,10 +43,14 @@ export default function Home() {
           />
           <div>
             <h1 className="text-lg font-semibold text-foreground">
-              ZKsync Token Program Capped Minter Overview
+              {isTestnet
+                ? "ZKsync Testnet Capped Minter Overview"
+                : "ZKsync Token Program Capped Minter Overview"}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              View and explore ZKsync Token Programs approved through the ZKsync governance system.
+              {isTestnet
+                ? "View and explore ZKsync capped minters deployed on testnet and approved through the testnet governance interface. Please note the testnet governance interface is not open to the public."
+                : "View and explore ZKsync Token Programs approved through the ZKsync governance system."}
             </p>
           </div>
         </section>
@@ -52,13 +59,26 @@ export default function Home() {
         </section>
         <section>
           <h2 className="mb-2 text-xl font-semibold text-foreground">
-            ZKsync Token Programs
+            {isTestnet
+              ? "ZKsync Testnet Capped Minters"
+              : "ZKsync Token Programs"}
           </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            The following table displays all parent capped minters from all
-            Token Programs approved through the ZKsync governance system.
-            <br />The image above will display all child capped minters (if any) for each
-            program.
+            {isTestnet ? (
+              <>
+                The following table displays all testnet parent capped minters approved via
+                testnet governance interface.
+                <br />The image above will display all testnet child capped minters (if any) for
+                each mechanic.
+              </>
+            ) : (
+              <>
+                The following table displays all parent capped minters from all
+                Token Programs approved through the ZKsync governance system.
+                <br />The image above will display all child capped minters (if any) for each
+                program.
+              </>
+            )}
           </p>
           <ProgramsTable
             onRowSelect={handleRowSelect}

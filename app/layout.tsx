@@ -7,6 +7,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { Providers } from "./providers";
 import { Header } from "./header";
+import { getChainId } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +19,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const isTestnet = getChainId() === 300;
+
 export const metadata: Metadata = {
-  title: "ZKsync Token Program Capped Minter Overview",
-  description: "Capped Minter Dashboard",
+  title: isTestnet
+    ? "ZKsync Testnet Capped Minter Overview"
+    : "ZKsync Token Program Capped Minter Overview",
+  description: isTestnet
+    ? "ZKsync Testnet Capped Minter Dashboard"
+    : "Capped Minter Dashboard",
 };
 
 export default function RootLayout({

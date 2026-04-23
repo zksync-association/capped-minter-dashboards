@@ -25,6 +25,7 @@ import {
 import type { MinterType } from "@/lib/types";
 import { DEPLOY_PROGRESS_EVENT_NAME } from "@/lib/hooks/useDeployMinter";
 import { useDeployProgressStore } from "@/lib/stores/deployProgressStore";
+import { getChainId } from "@/lib/utils";
 
 const DEPLOY_ITEMS: {
   href: string;
@@ -40,6 +41,7 @@ const DEPLOY_ITEMS: {
 const MAX_DEPLOY_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 export function Header() {
+  const isTestnet = getChainId() === 300;
   const activeDeploy = useDeployProgressStore((s) => s.activeDeploy);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -62,7 +64,11 @@ export function Header() {
           <Link
             href="/"
             className="flex items-center gap-2 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
-            aria-label="ZKsync Token Program Capped Minter Overview"
+            aria-label={
+              isTestnet
+                ? "ZKsync Testnet Capped Minter Overview"
+                : "ZKsync Token Program Capped Minter Overview"
+            }
           >
             <Image
               src="/brand/logo-blue.svg"
@@ -79,7 +85,9 @@ export function Header() {
               className="hidden dark:block h-8 w-auto"
             />
             <span className="text-sm font-semibold text-foreground hidden sm:inline">
-              ZKsync Token Program Capped Minter Overview
+              {isTestnet
+                ? "ZKsync Testnet Capped Minter Overview"
+                : "ZKsync Token Program Capped Minter Overview"}
             </span>
           </Link>
           <DropdownMenu>
