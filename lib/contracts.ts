@@ -25,7 +25,7 @@ const FACTORY_ADDRESSES: Record<
 
 const ZK_TOKEN_ADDRESSES: Partial<Record<number, `0x${string}`>> = {
   324: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E" as `0x${string}`, // zkSync Era mainnet ZK token
-  300: "0x279bf39BfEf85aab8Ece893F833aF6C045E4d7d2" as `0x${string}`, // zkSync Sepolia testnet ZK token
+  300: "0x69e5DC39E2bCb1C17053d2A4ee7CAEAAc5D36f96" as `0x${string}`, // zkSync Sepolia testnet ZK token
 };
 
 /**

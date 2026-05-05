@@ -25,7 +25,8 @@ export default function HowToPage() {
   const chainId = getChainId();
   const currentNetworkLabel =
     NETWORK_LABELS[chainId] ?? `chainId ${chainId}`;
-
+  const isTestnet = chainId === 300;
+  const tokenLabel = isTestnet ? "the testnet token" : "the ZK token";
 
   const zkTokenAddress = getZkTokenAddress(chainId);
 
@@ -42,15 +43,15 @@ export default function HowToPage() {
           />
           <div>
             <h1 className="text-2xl font-semibold text-foreground">
-              How to use the ZK Minter Deployment Interface
+              How to use the {isTestnet && "Testnet "}ZK Minter Deployment Interface
             </h1>
           <p className="text-sm text-muted-foreground">
-            Quick guide for deploying capped minters and mods, chaining them,
+            Quick guide for deploying capped minters and mods{isTestnet && " on testnet"}, chaining them,
             granting roles, and registering programs.
           </p>
           <ul className="mt-2 text-sm text-muted-foreground list-disc pl-5 space-y-1">
-            <li>Create a capped minter or mod from the header Deploy menu.</li>
-            <li>Chain minter contracts by deploying the next with mintable set to the previous one.</li>
+            <li>Create a {isTestnet && "testnet "}capped minter or mod from the header Deploy menu.</li>
+            <li>Chain {isTestnet && "testnet "}minter contracts by deploying the next with mintable set to the previous one.</li>
             <li>Grant roles via the Grant role page or post-deploy prompt.</li>
             <li>Addresses and PR instructions are listed below.</li>
           </ul>
@@ -68,7 +69,7 @@ export default function HowToPage() {
                 menu, pick a type (capped minter or mod).
               </li>
               <li>
-                Enter <span className="font-medium">mintable</span> (token or
+                Enter <span className="font-medium">mintable</span> ({isTestnet ? "testnet token address" : "token"} or
                 upstream minter contract), <span className="font-medium">admin</span>, and
                 any type-specific params.
               </li>
@@ -80,7 +81,7 @@ export default function HowToPage() {
               <li>
                 When prompted, use{" "}
                 <span className="font-medium">Grant Minter Role</span> to assign{" "}
-                <code>MINTER_ROLE</code> from your token or upstream minter to the
+                <code>MINTER_ROLE</code> from {tokenLabel} or upstream minter to the
                 newly deployed contract.
               </li>
             </ol>
@@ -95,7 +96,7 @@ export default function HowToPage() {
             <ol className="list-decimal space-y-1 pl-5">
               <li>
                 Deploy the first minter (e.g. a capped minter) with{" "}
-                <span className="font-medium">mintable</span> set to your token.
+                <span className="font-medium">mintable</span> set to {tokenLabel}.
               </li>
               <li>
                 In the deploy progress modal, use{" "}
@@ -151,7 +152,7 @@ export default function HowToPage() {
 
             <div>
               <p className="mb-2 font-medium text-foreground">
-                Factory and token addresses
+                {isTestnet && "Testnet "}Factory and Token Addresses
               </p>
               <ul className="list-disc space-y-1 pl-5">
                 {Object.entries(FACTORY_ADDRESSES).map(([type, perChain]) => {
@@ -174,7 +175,7 @@ export default function HowToPage() {
                 })}
                 {zkTokenAddress && (
                   <li>
-                    ZK token:{" "}
+                    {isTestnet ? "Testnet ZK Token" : "ZK token"}:{" "}
                     <Link
                       href={getBlockExplorerAddressUrl(zkTokenAddress)}
                       target="_blank"
