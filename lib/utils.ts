@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { isAddress as viemIsAddress } from "viem"
+import { isAddress as viemIsAddress, parseUnits } from "viem"
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const
 
@@ -30,6 +30,15 @@ export function formatTokenAmount(
   const divisor = BigInt(10 ** decimals)
   const whole = value / divisor
   return `${Number(whole).toLocaleString()} ${symbol}`
+}
+
+export function parseTokenAmount(value: string, decimals = 18): bigint {
+  const trimmed = value.trim()
+  const [, fraction = ""] = trimmed.split(".")
+  if (fraction.length > decimals) {
+    throw new Error(`Token amount cannot have more than ${decimals} decimal places`)
+  }
+  return parseUnits(trimmed, decimals)
 }
 
 export function formatDate(timestamp: number): string {
@@ -71,9 +80,13 @@ export function validateAdmin(value: string): string | undefined {
 export function validatePositiveNumber(value: string): string | undefined {
   const trimmed = value.trim()
   if (!trimmed) return "Required"
-  const num = Number(trimmed)
-  if (Number.isNaN(num)) return "Must be a number"
-  if (num <= 0) return "Must be greater than 0"
+  let amount: bigint
+  try {
+    amount = parseTokenAmount(trimmed)
+  } catch {
+    return "Must be a valid token amount"
+  }
+  if (amount <= 0n) return "Must be greater than 0"
   return undefined
 }
 

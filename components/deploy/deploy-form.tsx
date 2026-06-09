@@ -16,6 +16,7 @@ import {
   validateStartTime,
   validateExpirationTime,
   validateDurationSeconds,
+  parseTokenAmount,
 } from "@/lib/utils";
 import {
   AddressField,
@@ -112,7 +113,7 @@ export function DeployForm({
           ? {
               mintable: mintableHex,
               admin: adminHex,
-              cap: BigInt(cap),
+              cap: parseTokenAmount(cap),
               startTime: startTime!,
               expirationTime: expirationTime!,
             }
@@ -125,7 +126,7 @@ export function DeployForm({
             : {
                 mintable: mintableHex,
                 admin: adminHex,
-                mintRateLimit: BigInt(mintRateLimit),
+                mintRateLimit: parseTokenAmount(mintRateLimit),
                 mintRateLimitWindow: rateLimitWindow,
               };
 
@@ -238,7 +239,7 @@ export function DeployForm({
             value={cap}
             onChange={setCap}
             onBlur={() => touch("cap")}
-            placeholder="e.g. 1000000000000000000"
+            placeholder="e.g. 100"
             error={showError("cap")}
             required
           />
